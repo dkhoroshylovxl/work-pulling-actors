@@ -1,6 +1,6 @@
 package com.hunorkovacs.workpullingactors
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, Actor}
 import com.hunorkovacs.workpullingactors.Master._
 import com.hunorkovacs.workpullingactors.Worker._
 import org.slf4j.LoggerFactory
@@ -24,13 +24,16 @@ object Worker {
   }
 }
 
-abstract class Worker[T, R] extends ComposableActor {
+abstract class Worker[T, R] extends Actor {
   private val logger = LoggerFactory.getLogger(getClass)
   implicit private val ec = context.dispatcher
 
   private var shouldAskForWork = true
 
-  registerReceive {
+  override def preStart() =
+    askForWork(context.parent)
+
+  override def receive = {
     case WorkAvailable =>
       if (logger.isDebugEnabled)
         logger.debug(s"${self.path} - Received notice that work is available.")
@@ -52,9 +55,6 @@ abstract class Worker[T, R] extends ComposableActor {
         askForWork(returnTo)
       }
   }
-
-  override def preStart() =
-    askForWork(context.parent)
 
   private def doWorkAssociated(work: WorkFrom[T]): Future[Result[T, R]] = {
     val p = Promise[Result[T, R]]()
