@@ -1,4 +1,4 @@
-package com.hunorkovacs.workpullingactors
+package com.hunorkovacs.workpullingactors.collection.mutable
 
 import com.hunorkovacs.workpullingactors.Worker.WorkFrom
 

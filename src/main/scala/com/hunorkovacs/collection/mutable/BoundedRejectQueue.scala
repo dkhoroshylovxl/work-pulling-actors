@@ -3,18 +3,13 @@ package com.hunorkovacs.collection.mutable
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.hunorkovacs.workpullingactors.WorkBuffer
-import com.hunorkovacs.workpullingactors.Worker.WorkFrom
+class BoundedRejectQueue[T](protected val limit: Int, protected val refreshPeriod: Int) {
 
-
-class BoundedRejectWorkQueue[T](private val limit: Int,
-                                private val refreshPeriod: Int) extends WorkBuffer[T] {
-
-  private val queue = new ConcurrentLinkedQueue[WorkFrom[T]]()
+  protected val queue = new ConcurrentLinkedQueue[T]()
   private val sizeCounter = new AtomicInteger(0)
-  private val operationCounter = new AtomicInteger(0)
+  protected val operationCounter = new AtomicInteger(0)
 
-  override def add(w: WorkFrom[T]) = {
+  def add(w: T) = {
     refreshSize()
     if (sizeCounter.get() < limit) {
       sizeCounter.incrementAndGet()
@@ -43,8 +38,8 @@ class BoundedRejectWorkQueue[T](private val limit: Int,
   }
 }
 
-object BoundedRejectWorkQueue {
+object BoundedRejectQueue {
 
   def apply[T](limit: Int, refreshPeriod: Int = 100) =
-    new BoundedRejectWorkQueue[T](limit, refreshPeriod)
+    new BoundedRejectQueue[T](limit, refreshPeriod)
 }

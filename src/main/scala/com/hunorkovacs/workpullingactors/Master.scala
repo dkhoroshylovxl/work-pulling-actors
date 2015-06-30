@@ -5,6 +5,7 @@ import java.util.UUID.randomUUID
 import akka.actor._
 import com.hunorkovacs.workpullingactors.Master._
 import com.hunorkovacs.workpullingactors.Worker._
+import com.hunorkovacs.workpullingactors.collection.mutable.WorkBuffer
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable

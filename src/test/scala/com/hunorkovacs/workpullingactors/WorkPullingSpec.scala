@@ -3,11 +3,11 @@ package com.hunorkovacs.workpullingactors
 import java.util.concurrent.TimeoutException
 
 import akka.actor._
-import com.hunorkovacs.collection.mutable.BoundedRejectWorkQueue
 import com.hunorkovacs.workpullingactors.PromiseWorker.Kept
 import com.hunorkovacs.workpullingactors.Master.Result
 import com.hunorkovacs.workpullingactors.Master.TooBusy
 import com.hunorkovacs.workpullingactors.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.collection.mutable.{BoundedRejectWorkQueue, WorkBuffer}
 import org.specs2.mutable.Specification
 
 import scala.collection.mutable
