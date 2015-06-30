@@ -1,8 +1,8 @@
-package com.hunorkovacs.workpulling
+package com.hunorkovacs.workpullingactors
 
 import akka.actor.{ActorRef, Actor}
-import com.hunorkovacs.workpulling.Master._
-import com.hunorkovacs.workpulling.Worker._
+import com.hunorkovacs.workpullingactors.Master._
+import com.hunorkovacs.workpullingactors.Worker._
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.{Promise, Future}

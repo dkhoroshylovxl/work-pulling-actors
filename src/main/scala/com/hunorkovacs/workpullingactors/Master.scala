@@ -1,10 +1,10 @@
-package com.hunorkovacs.workpulling
+package com.hunorkovacs.workpullingactors
 
 import java.util.UUID.randomUUID
 
 import akka.actor._
-import com.hunorkovacs.workpulling.Master._
-import com.hunorkovacs.workpulling.Worker._
+import com.hunorkovacs.workpullingactors.Master._
+import com.hunorkovacs.workpullingactors.Worker._
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable

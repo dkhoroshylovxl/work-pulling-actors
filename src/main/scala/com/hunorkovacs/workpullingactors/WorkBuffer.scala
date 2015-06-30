@@ -1,6 +1,6 @@
-package com.hunorkovacs.workpulling
+package com.hunorkovacs.workpullingactors
 
-import com.hunorkovacs.workpulling.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.Worker.WorkFrom
 
 trait WorkBuffer[T] {
 

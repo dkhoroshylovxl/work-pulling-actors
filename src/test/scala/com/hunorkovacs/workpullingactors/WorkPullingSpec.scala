@@ -1,13 +1,13 @@
-package com.hunorkovacs.workpulling
+package com.hunorkovacs.workpullingactors
 
 import java.util.concurrent.TimeoutException
 
 import akka.actor._
 import com.hunorkovacs.collection.mutable.BoundedRejectWorkQueue
-import com.hunorkovacs.workpulling.PromiseWorker.Kept
-import com.hunorkovacs.workpulling.Master.Result
-import com.hunorkovacs.workpulling.Master.TooBusy
-import com.hunorkovacs.workpulling.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.PromiseWorker.Kept
+import com.hunorkovacs.workpullingactors.Master.Result
+import com.hunorkovacs.workpullingactors.Master.TooBusy
+import com.hunorkovacs.workpullingactors.Worker.WorkFrom
 import org.specs2.mutable.Specification
 
 import scala.collection.mutable

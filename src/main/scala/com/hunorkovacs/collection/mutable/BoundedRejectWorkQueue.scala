@@ -3,8 +3,8 @@ package com.hunorkovacs.collection.mutable
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.hunorkovacs.workpulling.WorkBuffer
-import com.hunorkovacs.workpulling.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.WorkBuffer
+import com.hunorkovacs.workpullingactors.Worker.WorkFrom
 
 
 class BoundedRejectWorkQueue[T](private val limit: Int,

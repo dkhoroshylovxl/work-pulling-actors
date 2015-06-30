@@ -1,6 +1,6 @@
 package com.hunorkovacs.collection.mutable
 
-import com.hunorkovacs.workpulling.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.Worker.WorkFrom
 import org.specs2.mutable.Specification
 
 class BoundedRejectQueueSpec extends Specification {
