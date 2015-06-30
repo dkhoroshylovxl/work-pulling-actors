@@ -40,15 +40,12 @@ object Master {
 }
 
 abstract class Master[T, R](private val nWorkers: Int,
-                            private val workBuffer: WorkBuffer[T]) extends Actor {
+                            private val workBuffer: WorkBuffer[T]) extends ComposableActor {
 
   private val logger = LoggerFactory.getLogger(getClass)
   private val workers = mutable.Set.empty[ActorRef]
 
-  override def preStart() =
-    refreshNrOfWorkers()
-
-  override def receive = {
+  registerReceive {
     case work: WorkFrom[T] =>
       if (workBuffer.add(work.assignedBy(sender()))) {
         if (logger.isDebugEnabled)
@@ -91,6 +88,9 @@ abstract class Master[T, R](private val nWorkers: Int,
       context.unwatch(worker)
       refreshNrOfWorkers()
   }
+
+  override def preStart() =
+    refreshNrOfWorkers()
 
   private def refreshNrOfWorkers() = {
     while (workers.size < nWorkers) {
