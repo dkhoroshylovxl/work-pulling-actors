@@ -24,7 +24,7 @@ sbt run
 
 Add this in your dependencies:
 
-`libraryDependencies += "com.hunorkovacs" %% "work-pulling-actors" % "1.0.0-SNAPSHOT"`
+`libraryDependencies += "com.hunorkovacs" %% "work-pulling-actors" % "1.0.0"`
 
 Define what working means by extending worker:
 
