@@ -14,6 +14,49 @@ and excessive work is coming, the master won't accept it but reply with a messag
 * Even though Failures should be properly built and handled, if a worker happens to crash, it will be discarded
 and replaced by a new worker, ignoring the problematic work unit.
 
+## Example
+
+```
+git clone https://github.com/kovacshuni/work-pulling-actors.git
+cd work-pulling-actors/example
+sbt run
+```
+
+Define what working means by extending worker:
+
+```scala
+class MyWorker extends Worker[String, Int] {
+
+  import context.dispatcher
+
+  override protected def doWork(s: String) = Future(s.toInt)
+}
+```
+
+Define how to create worker in master:
+
+```scala
+class MyMaster(nWorkers: Int, workBuffer: WorkBuffer[String]) extends Master[String, Int](nWorkers, workBuffer) {
+
+  override protected def newWorkerProps = Props(classOf[MyWorker])
+}
+```
+
+Run it:
+
+```scala
+val master = sys.actorOf(Props(classOf[MyMaster], 3, queue))
+val inbox = Inbox.create(sys)
+
+(1 to n) foreach { i =>
+  inbox.send(master, WorkFrom[String](i.toString))
+}
+
+val sum = (1 to n).foldLeft(0) { (acc, _) =>
+  acc + inbox.receive(2 seconds).asInstanceOf[Result[String, Int]].result.get
+}
+```
+
 ## Contributing
 
 Just create a pull-request, we'll discuss it, i'll try to be quick.

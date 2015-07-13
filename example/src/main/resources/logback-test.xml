@@ -5,8 +5,9 @@
         </encoder>
     </appender>
 
-    <logger name="com.hunorkovacs.workpullingactors" level="INFO" />
-    <logger name="akka" level="DEBUG" />
+    <logger name="com.hunorkovacs.workpullingactors.example" level="INFO" />
+    <logger name="com.hunorkovacs.workpullingactors" level="WARN" />
+    <logger name="akka" level="INFO" />
 
     <root level="ERROR">
         <appender-ref ref="STDOUT" />
