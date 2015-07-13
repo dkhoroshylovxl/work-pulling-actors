@@ -22,6 +22,8 @@ cd work-pulling-actors/example
 sbt run
 ```
 
+Add this in your dependencies:
+
 `libraryDependencies += "com.hunorkovacs" %% "work-pulling-actors" % "1.0.0-SNAPSHOT"`
 
 Define what working means by extending worker:
