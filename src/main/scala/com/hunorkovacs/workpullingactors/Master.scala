@@ -28,7 +28,7 @@ object Master {
   object Result {
     def apply[W, R](work: W, result: Try[R]) = new Result(work, Nil, result)
 
-    def apply[W, R](workFrom: WorkFrom[W], result: Try[R]) = new Result(workFrom.work, workFrom.assigners, result)
+    def apply[W, R](workFrom: Work[W], result: Try[R]) = new Result(workFrom.work, workFrom.assigners, result)
 
     def equal[W, R](a: Result[W, R], b: Result[W, R]) =
       a.work == b.work &&
@@ -51,7 +51,7 @@ abstract class Master[T, R](private val nWorkers: Int,
     refreshNrOfWorkers()
 
   override def receive = {
-    case work: WorkFrom[T] =>
+    case work: Work[T] =>
       if (workBuffer.add(work.assignedBy(sender()))) {
         if (logger.isDebugEnabled)
           logger.debug(s"${self.path} - Work unit with hashcode ${work.work.hashCode} added to queue.")

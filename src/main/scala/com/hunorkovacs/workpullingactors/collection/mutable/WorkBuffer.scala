@@ -1,12 +1,12 @@
 package com.hunorkovacs.workpullingactors.collection.mutable
 
-import com.hunorkovacs.workpullingactors.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.Worker.Work
 
 trait WorkBuffer[T] {
 
-  def add(w: WorkFrom[T]): Boolean
+  def add(w: Work[T]): Boolean
 
-  def poll: Option[WorkFrom[T]]
+  def poll: Option[Work[T]]
 
   def size: Int
 

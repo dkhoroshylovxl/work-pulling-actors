@@ -6,7 +6,7 @@ import akka.actor._
 import com.hunorkovacs.workpullingactors.PromiseWorker.Kept
 import com.hunorkovacs.workpullingactors.Master.Result
 import com.hunorkovacs.workpullingactors.Master.TooBusy
-import com.hunorkovacs.workpullingactors.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.Worker.Work
 import com.hunorkovacs.workpullingactors.collection.mutable.{BoundedRejectWorkQueue, WorkBuffer}
 import org.specs2.mutable.Specification
 
@@ -25,7 +25,7 @@ class WorkPullingSpec extends Specification {
       val n = 10
       val inbox = Inbox.create(system)
       val master = system.actorOf(PromiseKeeperMaster.props(1, BoundedRejectWorkQueue[Promise[Int]](n)), "master-1")
-      val worksAndCompletions = (1 to n).toList.map(i => (WorkFrom(Promise[Int]()), Success(i)))
+      val worksAndCompletions = (1 to n).toList.map(i => (Work(Promise[Int]()), Success(i)))
 
       worksAndCompletions.foreach(wc => inbox.send(master, wc._1))
       worksAndCompletions.foreach(wc => wc._1.work.complete(wc._2))
@@ -39,7 +39,7 @@ class WorkPullingSpec extends Specification {
       val n = 10
       val inbox = Inbox.create(system)
       val master = system.actorOf(PromiseKeeperMaster.props(n, BoundedRejectWorkQueue[Promise[Int]](n)), "master-2")
-      val worksAndCompletions = (1 to n).toList.map(i => (WorkFrom(Promise[Int]()), Success(i)))
+      val worksAndCompletions = (1 to n).toList.map(i => (Work(Promise[Int]()), Success(i)))
 
       worksAndCompletions.foreach(wc => inbox.send(master, wc._1))
       worksAndCompletions.foreach(wc => wc._1.work.complete(wc._2))
@@ -54,7 +54,7 @@ class WorkPullingSpec extends Specification {
       val inbox = Inbox.create(system)
       val master = system.actorOf(PromiseKeeperMaster.props(0, BoundedRejectWorkQueue[Promise[Int]](n)), "master-3")
 
-      val works = (1 to n).toList.map(w => WorkFrom(Promise.successful(w)))
+      val works = (1 to n).toList.map(w => Work(Promise.successful(w)))
       works.foreach(wc => inbox.send(master, wc))
 
       inbox.receive(500 millis).asInstanceOf[Set[Result[Promise[Int], Int]]] must throwA[TimeoutException]
@@ -63,7 +63,7 @@ class WorkPullingSpec extends Specification {
       val n = 10
       val inbox = Inbox.create(system)
       val master = system.actorOf(PromiseKeeperMaster.props(n, BoundedRejectWorkQueue[Promise[Int]](n)), "master-4")
-      val worksAndCompletions = (1 to 2 * n).toList.map(i => (WorkFrom(Promise[Int]()), Success(i)))
+      val worksAndCompletions = (1 to 2 * n).toList.map(i => (Work(Promise[Int]()), Success(i)))
 
       worksAndCompletions.foreach(wc => inbox.send(master, wc._1))
 
@@ -80,7 +80,7 @@ class WorkPullingSpec extends Specification {
       val n = 10
       val inbox = Inbox.create(system)
       val master = system.actorOf(PromiseKeeperMaster.props(n, BoundedRejectWorkQueue[Promise[Int]](n)), "master-5")
-      val worksAndCompletions = (1 to n).toList.map(i => (WorkFrom(Promise[Int]()), Failure[Int](new RuntimeException(i.toString))))
+      val worksAndCompletions = (1 to n).toList.map(i => (Work(Promise[Int]()), Failure[Int](new RuntimeException(i.toString))))
 
       worksAndCompletions.foreach(wc => inbox.send(master, wc._1))
       worksAndCompletions.foreach(wc => wc._1.work.complete(wc._2))
@@ -97,15 +97,15 @@ class WorkPullingSpec extends Specification {
       val inbox = Inbox.create(system)
       val master = system.actorOf(PromiseKeeperMaster.props(nWorkers, BoundedRejectWorkQueue[Promise[Int]](queueSize)), "master-6")
       val worksAndCompletions = (1 to nWorks).toList.map { i =>
-        val e: (WorkFrom[Promise[Int]], Try[Int]) = i % 2 match {
-          case 0 => (WorkFrom(Promise[Int]()), Success(i))
-          case 1 => (WorkFrom(Promise[Int]()), Failure[Int](new RuntimeException(i.toString)))
+        val e: (Work[Promise[Int]], Try[Int]) = i % 2 match {
+          case 0 => (Work(Promise[Int]()), Success(i))
+          case 1 => (Work(Promise[Int]()), Failure[Int](new RuntimeException(i.toString)))
         }
         e
       }
-      val senderQueue = mutable.Queue[(WorkFrom[Promise[Int]], Try[Int])]()
+      val senderQueue = mutable.Queue[(Work[Promise[Int]], Try[Int])]()
       worksAndCompletions.drop(queueSize / 2).foreach(senderQueue.enqueue(_))
-      val completerQueue = mutable.Queue[(WorkFrom[Promise[Int]], Try[Int])]()
+      val completerQueue = mutable.Queue[(Work[Promise[Int]], Try[Int])]()
       worksAndCompletions.foreach(completerQueue.enqueue(_))
 
       // send in some, to pre-fill the queue but not fully
@@ -148,7 +148,7 @@ class WorkPullingSpec extends Specification {
       val inbox = Inbox.create(system)
       val master = system.actorOf(PluggableMaster.props(nWorkers, BoundedRejectWorkQueue[Promise[Int]](queueSize),
         props), "master-7")
-      val worksAndCompletions = (1 to nWorks).toList.map(i => (WorkFrom(Promise[Int]()), Success(i)))
+      val worksAndCompletions = (1 to nWorks).toList.map(i => (Work(Promise[Int]()), Success(i)))
       worksAndCompletions.foreach(wc => wc._1.work.complete(wc._2))
 
       worksAndCompletions.take(nCrashers).foreach(wc => inbox.send(master, wc._1))
@@ -166,7 +166,7 @@ class WorkPullingSpec extends Specification {
       val n = 10
       val inbox = Inbox.create(system)
       val master = system.actorOf(PromiseKeeperMaster.props(1, BoundedRejectWorkQueue[Promise[Int]](n)), "master-8")
-      val worksAndCompletions = (1 to n).toList.map(i => (WorkFrom(Promise[Int]()), Success(i)))
+      val worksAndCompletions = (1 to n).toList.map(i => (Work(Promise[Int]()), Success(i)))
 
       Thread.sleep(2000)
 

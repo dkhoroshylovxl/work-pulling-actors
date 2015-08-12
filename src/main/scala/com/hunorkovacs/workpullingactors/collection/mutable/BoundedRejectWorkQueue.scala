@@ -1,11 +1,11 @@
 package com.hunorkovacs.workpullingactors.collection.mutable
 
 import com.hunorkovacs.collection.mutable.BoundedRejectQueue
-import com.hunorkovacs.workpullingactors.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.Worker.Work
 
 
 class BoundedRejectWorkQueue[T](limit: Int, refreshPeriod: Int)
-  extends BoundedRejectQueue[WorkFrom[T]](limit, refreshPeriod) with WorkBuffer[T] {
+  extends BoundedRejectQueue[Work[T]](limit, refreshPeriod) with WorkBuffer[T] {
 }
 
 object BoundedRejectWorkQueue {

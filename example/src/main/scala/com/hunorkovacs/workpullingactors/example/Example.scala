@@ -2,7 +2,7 @@ package com.hunorkovacs.workpullingactors.example
 
 import akka.actor.{Inbox, ActorSystem, Props}
 import com.hunorkovacs.workpullingactors.Master.Result
-import com.hunorkovacs.workpullingactors.Worker.WorkFrom
+import com.hunorkovacs.workpullingactors.Worker.Work$
 import com.hunorkovacs.workpullingactors.{Worker, Master}
 import com.hunorkovacs.workpullingactors.collection.mutable.{BoundedRejectWorkQueue, WorkBuffer}
 import org.slf4j.LoggerFactory
@@ -21,7 +21,7 @@ object Example extends App {
   private val inbox = Inbox.create(sys)
 
   (1 to n) foreach { i =>
-    inbox.send(master, WorkFrom[String](i.toString))
+    inbox.send(master, Work[String](i.toString))
   }
 
   private val sum = (1 to n).foldLeft(0) { (acc, _) =>

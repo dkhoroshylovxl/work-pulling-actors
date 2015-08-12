@@ -6,7 +6,6 @@
     </appender>
 
     <logger name="com.hunorkovacs.workpullingactors" level="DEBUG" />
-    <!--<logger name="akka" level="DEBUG" />-->
 
     <root level="ERROR">
         <appender-ref ref="STDOUT" />

@@ -12,15 +12,15 @@ object Worker {
 
   case object WorkAvailable
 
-  class WorkFrom[W] private (val work: W, val assigners: List[ActorRef]) {
+  class Work[W] private (val work: W, val assigners: List[ActorRef]) {
 
     def resolveWith[R](result: Try[R]) = Result[W, R](this, result)
 
-    def assignedBy(assigner: ActorRef) = new WorkFrom(work, assigner :: assigners)
+    def assignedBy(assigner: ActorRef) = new Work(work, assigner :: assigners)
   }
 
-  object WorkFrom {
-    def apply[W](work: W) = new WorkFrom[W](work, Nil)
+  object Work {
+    def apply[W](work: W) = new Work[W](work, Nil)
   }
 }
 
@@ -37,7 +37,7 @@ abstract class Worker[T, R] extends Actor {
         logger.debug(s"${self.path} - Received notice that work is available.")
       askForWork(sender())
 
-    case work: WorkFrom[T] =>
+    case work: Work[T] =>
       if (logger.isDebugEnabled)
         logger.debug(s"${self.path} - Starting to work on work unit with hashcode ${work.work.hashCode}...")
       val forwardedWork = work.assignedBy(sender())
@@ -49,7 +49,7 @@ abstract class Worker[T, R] extends Actor {
       }
   }
 
-  private def doWorkAssociated(work: WorkFrom[T]): Future[Result[T, R]] = {
+  private def doWorkAssociated(work: Work[T]): Future[Result[T, R]] = {
     val p = Promise[Result[T, R]]()
     doWork(work.work).onComplete(r => p.success(work.resolveWith(r)))
     p.future
