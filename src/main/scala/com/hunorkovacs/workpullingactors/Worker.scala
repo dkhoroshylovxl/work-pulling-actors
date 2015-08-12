@@ -28,8 +28,6 @@ abstract class Worker[T, R] extends Actor {
   private val logger = LoggerFactory.getLogger(getClass)
   implicit private val ec = context.dispatcher
 
-  private var shouldAskForWork = true
-
   override def preStart() =
     askForWork(context.parent)
 
@@ -43,16 +41,11 @@ abstract class Worker[T, R] extends Actor {
       if (logger.isDebugEnabled)
         logger.debug(s"${self.path} - Starting to work on work unit with hashcode ${work.work.hashCode}...")
       val forwardedWork = work.assignedBy(sender())
-      doWorkAssociated(forwardedWork) onSuccess { case result =>
-        if (logger.isDebugEnabled) {
-          val resultHash = result.result.getOrElse(result).hashCode
-          logger.debug(s"${self.path} - Sending result with hashcode $resultHash of the work unit with hashcode ${result.work.hashCode}...")
-        }
-        val returnTo = result.assigners.head
-        returnTo ! result.popAssigner()
-        shouldAskForWork = true
-
-        askForWork(returnTo)
+      doWorkAssociated(forwardedWork) onSuccess {
+        case result: Result[T, R] =>
+          val returnTo = result.assigners.head
+          tellResult(returnTo, result)
+          askForWork(returnTo)
       }
   }
 
@@ -65,12 +58,17 @@ abstract class Worker[T, R] extends Actor {
   protected def doWork(work: T): Future[R]
 
   private def askForWork(master: ActorRef) = {
-    if (shouldAskForWork) {
-      if (logger.isDebugEnabled)
-        logger.debug(s"${self.path} - Asking for work from ${master.path}...")
-      master ! GiveMeWork
-      shouldAskForWork = false
+    if (logger.isDebugEnabled)
+      logger.debug(s"${self.path} - Asking for work from ${master.path}...")
+    master ! GiveMeWork
+  }
+
+  private def tellResult(returnTo: ActorRef, result: Result[T, R]) = {
+    if (logger.isDebugEnabled) {
+      val resultHash = result.result.getOrElse(result).hashCode
+      logger.debug(s"${self.path} - Sending result with hashcode $resultHash of the work unit with hashcode ${result.work.hashCode}...")
     }
+    returnTo ! result.popAssigner()
   }
 }
 

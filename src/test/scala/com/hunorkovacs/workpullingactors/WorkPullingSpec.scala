@@ -67,7 +67,7 @@ class WorkPullingSpec extends Specification {
 
       worksAndCompletions.foreach(wc => inbox.send(master, wc._1))
 
-      (1 to n).foreach(_ => inbox.receive(1 second) must beEqualTo(TooBusy))
+      worksAndCompletions.drop(n).foreach(wc => inbox.receive(1 second) must beEqualTo(TooBusy(wc._1)))
 
       worksAndCompletions.foreach(wc => wc._1.work.complete(wc._2))
 
@@ -158,6 +158,25 @@ class WorkPullingSpec extends Specification {
       val expectedResults = worksAndCompletions.drop(nCrashers).map(wc => wc._1.resolveWith(wc._2))
       actualResults must containTheSameElementsAs(expectedResults, (a: Kept, b: Kept) => Result.equal(a, b))
       actualResults.size must beEqualTo(nWorks - nCrashers)
+    }
+  }
+
+  "Workers that get intermittent assignments" should {
+    "resume flawlessly." in {
+      val n = 10
+      val inbox = Inbox.create(system)
+      val master = system.actorOf(PromiseKeeperMaster.props(1, BoundedRejectWorkQueue[Promise[Int]](n)), "master-8")
+      val worksAndCompletions = (1 to n).toList.map(i => (WorkFrom(Promise[Int]()), Success(i)))
+
+      Thread.sleep(2000)
+
+      worksAndCompletions.foreach(wc => inbox.send(master, wc._1))
+      worksAndCompletions.foreach(wc => wc._1.work.complete(wc._2))
+
+      val expectedResults = worksAndCompletions.map(wc => wc._1.resolveWith(wc._2))
+      val actualResults = (1 to n).toList.map(_ => inbox.receive(2 seconds).asInstanceOf[Kept])
+      actualResults must containTheSameElementsAs(expectedResults, (a: Kept, b: Kept) => Result.equal(a, b))
+      actualResults.size must beEqualTo(n)
     }
   }
 }
