@@ -13,6 +13,8 @@ import scala.util.Try
 
 object Master {
 
+  private val RefreshPerMinuteLimit = 10
+
   case object GiveMeWork
 
   class Result[W, R] private (val work: W, val assigners: List[ActorRef], val result: Try[R]) {
@@ -37,6 +39,8 @@ object Master {
   }
 
   case class TooBusy[W](work: W)
+
+  case object RefreshNrOfWorkers
 }
 
 abstract class Master[T, R](private val nWorkers: Int,
@@ -46,6 +50,8 @@ abstract class Master[T, R](private val nWorkers: Int,
   private val workers = mutable.Set.empty[ActorRef]
   private val busy = mutable.Set.empty[ActorRef]
   private val idle = mutable.Set.empty[ActorRef]
+  private var nRefreshedLastMinute = 0.0f
+  private var lastTimeRefreshed = System.currentTimeMillis
 
   override def preStart() =
     refreshNrOfWorkers()
@@ -104,10 +110,19 @@ abstract class Master[T, R](private val nWorkers: Int,
       idle -= worker
       workers -= worker
       context.unwatch(worker)
+      if (nRefreshedLastMinute < RefreshPerMinuteLimit) refreshNrOfWorkers()
+
+    case RefreshNrOfWorkers =>
       refreshNrOfWorkers()
   }
 
   private def refreshNrOfWorkers() = {
+    val now = System.currentTimeMillis
+    if (now - lastTimeRefreshed > 60000) {
+      nRefreshedLastMinute = 0
+      lastTimeRefreshed = now
+    } else nRefreshedLastMinute += 1
+
     (1 to (nWorkers - workers.size)) foreach { _ =>
       val newWorker = context.actorOf(newWorkerProps, "pullingworker-" + randomUUID)
       context.watch(newWorker)
