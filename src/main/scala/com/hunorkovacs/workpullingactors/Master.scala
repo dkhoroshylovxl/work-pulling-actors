@@ -102,13 +102,13 @@ abstract class Master[T, R](private val nWorkers: Int,
         logger.info(s"${self.path} - Termination message got from and restarting worker ${worker.path}...")
       busy -= worker
       idle -= worker
-      workers.remove(worker)
+      workers -= worker
       context.unwatch(worker)
       refreshNrOfWorkers()
   }
 
   private def refreshNrOfWorkers() = {
-    while (workers.size < nWorkers) {
+    (1 to (nWorkers - workers.size)) foreach { _ =>
       val newWorker = context.actorOf(newWorkerProps, "pullingworker-" + randomUUID)
       context.watch(newWorker)
       workers += newWorker

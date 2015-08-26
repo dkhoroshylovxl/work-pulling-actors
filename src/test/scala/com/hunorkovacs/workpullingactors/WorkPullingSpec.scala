@@ -11,7 +11,7 @@ import com.hunorkovacs.workpullingactors.collection.mutable.{BoundedRejectWorkQu
 import org.specs2.mutable.Specification
 
 import scala.collection.mutable
-import scala.concurrent.{Promise, ExecutionContext}
+import scala.concurrent.{Future, Promise, ExecutionContext}
 import scala.util.{Failure, Success, Try}
 
 import scala.concurrent.duration._
@@ -179,6 +179,14 @@ class WorkPullingSpec extends Specification {
       actualResults.size must beEqualTo(n)
     }
   }
+
+  "Masters, while refreshing workers" should {
+    "not enter infinite loop in case of workers that throw exception on initialization." in {
+      system.actorOf(MasterWithWorkersThatDontStart.props, "master-9")
+
+      1 must beEqualTo(1)
+    }
+  }
 }
 
 private class PromiseKeeperMaster(nWorkers: Int, workBuffer: WorkBuffer[Int])
@@ -222,4 +230,24 @@ private class CrashingWorker extends PromiseWorker {
 
 private object CrashingWorker {
   def props = Props(classOf[CrashingWorker])
+}
+
+private class MasterWithWorkersThatDontStart extends Master[Unit, Unit](1, BoundedRejectWorkQueue[Unit](1)) {
+
+  override protected def newWorkerProps = WorkerThatDoesntStart.props
+}
+
+private object MasterWithWorkersThatDontStart {
+  def props = Props(classOf[MasterWithWorkersThatDontStart])
+}
+
+private class WorkerThatDoesntStart extends Worker[Unit, Unit] {
+
+  throw new RuntimeException("Initialization exception on purpose.")
+
+  override def doWork(work: Unit) = Future.successful(Unit)
+}
+
+private object WorkerThatDoesntStart {
+  def props = Props(classOf[WorkerThatDoesntStart])
 }
