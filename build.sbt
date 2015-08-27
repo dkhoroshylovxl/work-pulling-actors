@@ -10,6 +10,8 @@ version := "1.0.1-SNAPSHOT"
 
 scalaVersion := "2.11.6"
 
+resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
 libraryDependencies ++= List(
   "com.typesafe.akka" %% "akka-actor" % "2.3.11",
   "org.slf4j" % "slf4j-api" % "1.7.12",
